@@ -3,29 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gorda Inventory System v3.0</title>
+    <title>Gorda Inventory System v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .checked-item { background-color: #ecfdf5; border-left: 4px solid #10b981; }
+        .checked-item { background-color: #ecfdf5; border-left: 4px solid #10b981; opacity: 0.8; }
         .unchecked-item { background-color: white; border-left: 4px solid #ef4444; }
-        .hidden-row { display: none !important; }
+        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: bold; }
     </style>
 </head>
-<body class="pb-10">
+<body class="pb-20">
 
     <div class="bg-indigo-900 text-white p-6 shadow-xl sticky top-0 z-50">
         <div class="max-w-4xl mx-auto">
-            <h1 class="text-xl font-bold uppercase tracking-widest"><i class="fas fa-boxes mr-2"></i> Inventory Gorda</h1>
-            <div class="mt-4 bg-indigo-800 rounded-full h-4 overflow-hidden border border-indigo-700">
-                <div id="progressBar" class="bg-emerald-400 h-full transition-all duration-500" style="width: 0%"></div>
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold uppercase tracking-widest"><i class="fas fa-boxes mr-2"></i> Inventory Gorda</h1>
+                <div class="text-right">
+                    <p id="statsText" class="text-[10px] font-mono uppercase opacity-80">0/0 Item</p>
+                    <p id="percentText" class="text-lg font-bold text-emerald-400">0%</p>
+                </div>
             </div>
-            <div class="flex justify-between items-center mt-1">
-                <p id="statsText" class="text-[10px] font-mono uppercase opacity-80">0/0 Item Terpenuhi (0%)</p>
-                <p id="searchStatus" class="text-[10px] font-mono uppercase opacity-80 hidden italic text-emerald-300">Filtering...</p>
+            <div class="mt-2 bg-indigo-800 rounded-full h-2 overflow-hidden">
+                <div id="progressBar" class="bg-emerald-400 h-full transition-all duration-500" style="width: 0%"></div>
             </div>
         </div>
     </div>
@@ -37,254 +39,172 @@
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
                     <i class="fas fa-search"></i>
                 </span>
-                <input type="text" id="searchInput" onkeyup="searchBarang()" 
-                       placeholder="Cari barang (misal: Amidas, Tisu, Galon)..." 
-                       class="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none focus:ring-2 ring-indigo-500 transition-all text-sm">
+                <input type="text" id="searchInput" onkeyup="render()" 
+                       placeholder="Cari barang di kategori ini..." 
+                       class="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none focus:ring-2 ring-indigo-500 text-sm">
             </div>
 
-            <div class="flex flex-wrap gap-2 pt-2 border-t">
-                <button onclick="downloadJPG()" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 text-[10px] font-bold">
-                    <i class="fas fa-image mr-1"></i> JPG
-                </button>
-                <button onclick="generatePDF()" class="bg-rose-600 text-white px-4 py-2 rounded shadow hover:bg-rose-700 text-[10px] font-bold">
-                    <i class="fas fa-file-pdf mr-1"></i> PDF LAPORAN
-                </button>
-                <button onclick="resetData()" class="bg-slate-100 text-slate-500 px-4 py-2 rounded text-[10px] font-bold ml-auto">
-                    RESET DATA
-                </button>
+            <div class="flex overflow-x-auto pb-2 gap-4 text-xs uppercase tracking-wider text-slate-500 border-b" id="tabBar">
+                <button onclick="switchTab('SEMUA')" id="tab-SEMUA" class="tab-active whitespace-nowrap pb-2">Semua</button>
+                <button onclick="switchTab('MEBEL')" id="tab-MEBEL" class="whitespace-nowrap pb-2">Mebel & Ruang</button>
+                <button onclick="switchTab('MAKAN')" id="tab-MAKAN" class="whitespace-nowrap pb-2">Alat Makan</button>
+                <button onclick="switchTab('KONSUMSI')" id="tab-KONSUMSI" class="whitespace-nowrap pb-2">Konsumsi</button>
+                <button onclick="switchTab('BERSIH')" id="tab-BERSIH" class="whitespace-nowrap pb-2">Kebersihan & Mandi</button>
+                <button onclick="switchTab('LAIN')" id="tab-LAIN" class="whitespace-nowrap pb-2">Lainnya</button>
+            </div>
+
+            <div class="flex gap-2 pt-2">
+                <button onclick="downloadJPG()" class="bg-blue-600 text-white px-3 py-2 rounded text-[10px] font-bold shadow hover:bg-blue-700">JPG</button>
+                <button onclick="generatePDF()" class="bg-rose-600 text-white px-3 py-2 rounded text-[10px] font-bold shadow hover:bg-rose-700">PDF LAPORAN</button>
+                <button onclick="resetData()" class="bg-slate-100 text-slate-500 px-3 py-2 rounded text-[10px] font-bold ml-auto">RESET</button>
             </div>
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-md mb-6 border-b-4 border-indigo-500">
-            <h3 class="text-[10px] font-bold mb-3 uppercase text-slate-400 tracking-wider">Input Barang Manual</h3>
-            <div class="flex gap-2">
-                <input type="text" id="newItemName" placeholder="Nama Barang..." class="flex-1 border-b p-2 text-sm outline-none focus:border-indigo-500">
-                <input type="text" id="newItemQty" placeholder="Qty" class="w-20 border-b p-2 text-sm outline-none focus:border-indigo-500">
-                <button onclick="addItem()" class="bg-indigo-600 text-white px-5 rounded-lg font-bold hover:bg-indigo-700 transition">+</button>
+        <div class="bg-white p-4 rounded-xl shadow-md mb-6 border-l-4 border-indigo-500">
+            <div class="flex flex-wrap gap-2">
+                <input type="text" id="newItemName" placeholder="Nama Barang..." class="flex-1 border-b p-2 text-sm outline-none">
+                <input type="text" id="newItemQty" placeholder="Qty" class="w-16 border-b p-2 text-sm outline-none">
+                <select id="newItemCat" class="border-b text-sm p-2 outline-none text-slate-500">
+                    <option value="MEBEL">Mebel</option>
+                    <option value="MAKAN">Alat Makan</option>
+                    <option value="KONSUMSI">Konsumsi</option>
+                    <option value="BERSIH">Kebersihan</option>
+                    <option value="LAIN" selected>Lainnya</option>
+                </select>
+                <button onclick="addItem()" class="bg-indigo-600 text-white px-4 rounded-lg font-bold">+</button>
             </div>
         </div>
 
-        <div id="main-list" class="space-y-3">
-            </div>
+        <div id="main-list" class="space-y-3"></div>
     </div>
 
     <script>
-        // Data Gabungan dari PDF & Input List User 
+        let currentTab = 'SEMUA';
+
         const initialData = [
-            /* =========================
-               FURNITUR & PERABOT
-            ========================= */
-            
-            { n: "Sofa Pimpinan Panjang (Qoah)", q: "-" },
-            { n: "Sofa Pimpinan Pendek (Qoah)", q: "-" },
-            { n: "Meja Pimpinan Panjang (Qoah)", q: "1" },
-            { n: "Meja Pimpinan Pendek (Qoah)", q: "1" },
-            { n: "Sofa (Muat 6 Orang) (Transit)", q: "Fleksibel" },
-            { n: "Meja Pimpinan (Transit)", q: "3" },
-            { n: "Meja (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5" },
-            { n: "Kursi Futura (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5" },
-            { n: "Sarung Kursi (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5" },
-            { n: "Meja KMI", q: "11" },
-            { n: "Kursi Futura", q: "15" },
-            { n: "Kasur", q: "Fleksibel" },
-            { n: "Jemuran Baju", q: "3" },
-            { n: "Kulkas", q: "-" },
-            { n: "Dispenser", q: "3" },
-            
-            /* =========================
-               DEKORASI & INTERIOR
-            ========================= */
-            
-            { n: "Taplak Meja Gontor 2 Direktur KMI, Wapeng dan Wadir Gontor 2", q: "3" },
-            { n: "Taplak Meja Panjimas", q: "11" },
-            { n: "Taplak Emas (Qoah)", q: "3" },
-            { n: "Taplak Emas (Transit)", q: "3" },
-            { n: "Cermin Amen Gorda (Transit)", q: "2" },
-            { n: "Cermin Amen Gorda (Kamar)", q: "2" },
-            { n: "Gorden", q: "10" },
-            { n: "Tulisan Password Wifi Di Transit", q: "3" },
-            
-            /* =========================
-               PERALATAN MAKAN
-            ========================= */
-            
-            { n: "Piring Ceper Pimpinan", q: "3" },
-            { n: "Piring Ceper (Transit)", q: "3" },
-            { n: "Piring Makan Biasa Penguji", q: "25" },
-            { n: "Piring Biasa Buat Toam Bal-Balan Kelas 6", q: "40" },
-            { n: "Gelas Tangkai", q: "3" },
-            { n: "Tutup Gelas Tangkai", q: "3" },
-            { n: "Sendok Makan Besi", q: "25" },
-            { n: "Sendok Plastik Besar", q: "5 Slop" },
-            { n: "Sendok Plastik Kecil", q: "4 Pack" },
-            { n: "Nampan", q: "4" },
-            { n: "Mangkuk", q: "25" },
-            { n: "Tudung Saji", q: "3" },
-            { n: "Tempat Amidas Gelas", q: "6" },
-            
-            /* =========================
-               KONSUMSI & MINUMAN
-            ========================= */
-            
-            { n: "Amidas Gelas 220 ml", q: "90 Dus" },
-            { n: "Amidas Botol 600 ml", q: "5 Dus" },
-            { n: "Amidas Galon", q: "15 Galon" },
-            { n: "Galon (Transit, Panjimas dan Kelas 6)", q: "16" },
-            { n: "Bal-Balan Pedes", q: "2 Bal (Fleksibel)" },
-            { n: "Bal-Balan Gurih", q: "8 Bal (Fleksibel)" },
-            { n: "Bal-Balan Manis", q: "3 Bal (Fleksibel)" },
-            { n: "Parcel Buah", q: "9 Parcel tiap ujian" },
-            { n: "Toam Toples Ust Suyuh", q: "6-8 Jenis" },
-            { n: "Snak DDC", q: "Fleksibel" },
-            { n: "Minuman Saset Panitia", q: "Fleksibel" },
-            { n: "Minuman Kulkas", q: "Fleksibel" },
-            { n: "Aneka Minuman Saset", q: "Fleksibel" },
-            { n: "Aneka Suplemen Kesehatan", q: "Fleksibel" },
-            
-            /* =========================
-               KEBERSIHAN
-            ========================= */
-            
-            { n: "Sapu Kamar (Ijuk)", q: "Fleksibel" },
-            { n: "Sapu Lidi", q: "Fleksibel" },
-            { n: "Pel Pelan", q: "4" },
-            { n: "Superpel", q: "2" },
-            { n: "Sikat WC", q: "5" },
-            { n: "Vixal", q: "5" },
-            { n: "Rinso", q: "2" },
-            { n: "Sikat Cuci Baju", q: "2" },
-            { n: "Tempat Sampah (Transit + Kamar Mandi Transit)", q: "8" },
-            { n: "Tempat Sampah Gedhe (Kamar Panjimas)", q: "3" },
-            { n: "Kresek Sampah (Kamar Panjimas)", q: "4" },
-            { n: "Kresek Sampah (Transit)", q: "2" },
-            { n: "Kresek Bontrot (Transit)", q: "5 Pack" },
-            
-            /* =========================
-               KAMAR MANDI
-            ========================= */
-            
-            { n: "Sabun Mandi Cair Besar (Kamar Mandi Transit)", q: "2" },
-            { n: "Sabun Mandi Cair Besar (Kamar Mandi Panjimas)", q: "3" },
-            { n: "Sabun Muka", q: "3" },
-            { n: "Sabun Cuci Tangan", q: "1" },
-            { n: "Odol", q: "3" },
-            { n: "Sikat Gigi", q: "6" },
-            { n: "Listerin", q: "3" },
-            { n: "Handuk (Kamar Mandi Transit)", q: "2" },
-            { n: "Handuk (Kamar Mandi Panjimas)", q: "5" },
-            { n: "Handuk Lap di Washtafle", q: "1" },
-            { n: "Pengharum Ruangan", q: "2" },
-            { n: "Pengharum Ruangan (Kamar Panjimas)", q: "1" },
-            { n: "Pengharum Kamar Mandi (Kamar Mandi Transit)", q: "2" },
-            { n: "Kapur Barus (Kamar Mandi Transit)", q: "6" },
-            { n: "Kapur Barus (Kamar Mandi Panjimas)", q: "3" },
-            { n: "Ember Tempat Air (Kamar Mandi Panjimas)", q: "2" },
-            { n: "Gayung (Kamar Mandi Panjimas)", q: "2" },
-            
-            /* =========================
-               PERLENGKAPAN UMUM
-            ========================= */
-            
-            { n: "Terminal Listrik (Transit)", q: "1" },
-            { n: "Terminal Listrik (Kamar)", q: "Fleksibel" },
-            { n: "Paku Payung", q: "Fleksibel" },
-            { n: "Hanger", q: "30" },
-            { n: "Gantungan Baju (Kamar Mandi Transit)", q: "2" },
-            { n: "Gantungan Baju Di Dalam Kamar Panjimas", q: "7" },
-            { n: "Gantungan Di Kamar Mandi (Kamar Mandi Panjimas)", q: "3" },
-            { n: "Tisu Kotak Kardus", q: "20 (-10)" },
-            { n: "Tisu Kecil Tepos", q: "50" },
-            { n: "Tisu Besar (Transit)", q: "1" },
-            { n: "Tisu Besar (Kamar Panjimas)", q: "3" },
-            { n: "Tisu Besar (Tempat Refill Konsumtor)", q: "2" },
-            { n: "Plastik Wrapping", q: "3" },
-            { n: "Toples (Transit)", q: "10" },
-            { n: "Toples Rodong (Kamar Panjimas)", q: "4" },
-            { n: "Rodong Krupuk (Transit)", q: "1" },
-            { n: "Tempat Minuman Saset (Kamar Panjimas)", q: "1" },
-            { n: "Tempat Kopi (Kamar Panjimas)", q: "1" },
-            { n: "Pisau Selai", q: "2" },
-            { n: "Pisau Potong", q: "2" },
-            { n: "Asbak", q: "3" },
-            { n: "Pemanggang Roti", q: "2" }
+            // MEBEL & RUANG
+            { n: "Sofa Pimpinan Panjang (Qoah)", q: "-", c: "MEBEL" },
+            { n: "Sofa Pimpinan Pendek (Qoah)", q: "-", c: "MEBEL" },
+            { n: "Meja Pimpinan Panjang (Qoah)", q: "1", c: "MEBEL" },
+            { n: "Meja Pimpinan Pendek (Qoah)", q: "1", c: "MEBEL" },
+            { n: "Meja Pimpinan (Transit)", q: "3", c: "MEBEL" },
+            { n: "Meja KMI", q: "11", c: "MEBEL" },
+            { n: "Kursi Futura", q: "15", c: "MEBEL" },
+            { n: "Kasur", q: "Fleksibel", c: "MEBEL" },
+            { n: "Cermin Amen Gorda", q: "4", c: "MEBEL" },
+            { n: "Taplak Meja Panjimas", q: "11", c: "MEBEL" },
+            { n: "Gorden", q: "10", c: "MEBEL" },
+
+            // ALAT MAKAN
+            { n: "Piring Ceper Pimpinan", q: "3", c: "MAKAN" },
+            { n: "Piring Makan Biasa Penguji", q: "25", c: "MAKAN" },
+            { n: "Gelas Tangkai", q: "3", c: "MAKAN" },
+            { n: "Tutup Gelas Tangkai", q: "3", c: "MAKAN" },
+            { n: "Sendok Makan Besi", q: "25", c: "MAKAN" },
+            { n: "Sendok Plastik Besar", q: "5 Slop", c: "MAKAN" },
+            { n: "Sendok Plastik Kecil", q: "4 Pack", c: "MAKAN" },
+            { n: "Mangkuk", q: "25", c: "MAKAN" },
+            { n: "Tudung Saji", q: "3", c: "MAKAN" },
+            { n: "Toples (Transit)", q: "10", c: "MAKAN" },
+            { n: "Rodong Krupuk (Transit)", q: "1", c: "MAKAN" },
+
+            // KONSUMSI
+            { n: "Amidas Gelas 220 ml", q: "90 Dus", c: "KONSUMSI" },
+            { n: "Amidas Botol 600 ml", q: "5 Dus", c: "KONSUMSI" },
+            { n: "Amidas Galon", q: "15 Galon", c: "KONSUMSI" },
+            { n: "Bal-Balan Pedes", q: "2 Bal", c: "KONSUMSI" },
+            { n: "Bal-Balan Gurih", q: "8 Bal", c: "KONSUMSI" },
+            { n: "Bal-Balan Manis", q: "3 Bal", c: "KONSUMSI" },
+            { n: "Parcel Buah", q: "9 Parcel", c: "KONSUMSI" },
+            { n: "Toam Toples Ust Suyuh", q: "6-8 Jenis", c: "KONSUMSI" },
+            { n: "Minuman Saset Panitia", q: "Fleksibel", c: "KONSUMSI" },
+
+            // KEBERSIHAN
+            { n: "Pel Pelan", q: "4", c: "BERSIH" },
+            { n: "Superpel", q: "2", c: "BERSIH" },
+            { n: "Sikat WC", q: "5", c: "BERSIH" },
+            { n: "Vixal", q: "5", c: "BERSIH" },
+            { n: "Sabun Mandi Cair Besar", q: "5", c: "BERSIH" },
+            { n: "Odol", q: "3", c: "BERSIH" },
+            { n: "Sikat Gigi", q: "6", c: "BERSIH" },
+            { n: "Handuk", q: "7", c: "BERSIH" },
+            { n: "Tisu Kotak Kardus", q: "20", c: "BERSIH" },
+
+            // LAINNYA
+            { n: "Password Wifi Transit", q: "3", c: "LAIN" },
+            { n: "Terminal Listrik", q: "Fleksibel", c: "LAIN" },
+            { n: "Hanger", q: "30", c: "LAIN" },
+            { n: "Pemanggang Roti", q: "2", c: "LAIN" },
+            { n: "Asbak", q: "3", c: "LAIN" }
         ];
 
-        let inventory = JSON.parse(localStorage.getItem('gorda_v3')) || initialData.map((d, i) => ({...d, id: Date.now() + i, done: false}));
+        let inventory = JSON.parse(localStorage.getItem('gorda_v4')) || initialData.map((d, i) => ({...d, id: Date.now() + i, done: false}));
 
         function save() {
-            localStorage.setItem('gorda_v3', JSON.stringify(inventory));
+            localStorage.setItem('gorda_v4', JSON.stringify(inventory));
             render();
         }
 
-        // FUNGSI SEARCH (PENCARIAN)
-        function searchBarang() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const rows = document.querySelectorAll('.item-row');
-            const searchStatus = document.getElementById('searchStatus');
-
-            if(input) searchStatus.classList.remove('hidden');
-            else searchStatus.classList.add('hidden');
-
-            rows.forEach(row => {
-                const text = row.querySelector('.item-name').innerText.toLowerCase();
-                if(text.includes(input)) {
-                    row.classList.remove('hidden-row');
-                } else {
-                    row.classList.add('hidden-row');
-                }
-            });
+        function switchTab(cat) {
+            currentTab = cat;
+            document.querySelectorAll('#tabBar button').forEach(btn => btn.classList.remove('tab-active'));
+            document.getElementById('tab-' + cat).classList.add('tab-active');
+            render();
         }
 
         function render() {
             const list = document.getElementById('main-list');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
             list.innerHTML = "";
-            let doneCount = 0;
+            
+            let doneCount = inventory.filter(i => i.done).length;
+            
+            // Filter Berdasarkan Tab & Search
+            const filtered = inventory.filter(item => {
+                const matchTab = (currentTab === 'SEMUA' || item.c === currentTab);
+                const matchSearch = item.n.toLowerCase().includes(searchQuery);
+                return matchTab && matchSearch;
+            });
 
-            inventory.forEach((item, index) => {
-                if(item.done) doneCount++;
+            filtered.forEach((item) => {
+                const idx = inventory.findIndex(i => i.id === item.id);
                 list.innerHTML += `
-                    <div class="flex items-center p-4 rounded-lg shadow-sm transition-all item-row ${item.done ? 'checked-item' : 'unchecked-item'}">
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggle(${index})" class="w-5 h-5 cursor-pointer accent-emerald-500">
+                    <div class="flex items-center p-4 rounded-lg shadow-sm transition-all ${item.done ? 'checked-item' : 'unchecked-item'}">
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggle(${idx})" class="w-5 h-5 cursor-pointer accent-emerald-500">
                         <div class="flex-1 ml-4">
-                            <h4 class="text-sm font-bold item-name ${item.done ? 'text-emerald-700' : 'text-slate-800'}">${item.n}</h4>
-                            <p class="text-[10px] text-slate-500 uppercase font-mono">Qty: ${item.q}</p>
+                            <h4 class="text-sm font-bold ${item.done ? 'text-emerald-700' : 'text-slate-800'}">${item.n}</h4>
+                            <div class="flex gap-2 items-center">
+                                <span class="text-[9px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold">${item.c}</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-mono">Qty: ${item.q}</span>
+                            </div>
                         </div>
-                        <button onclick="remove(${index})" class="text-slate-300 hover:text-red-500 p-2 ml-2 transition-colors">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                        <button onclick="remove(${idx})" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `;
             });
 
+            // Update Progress Bar
             const percent = inventory.length ? Math.round((doneCount / inventory.length) * 100) : 0;
             document.getElementById('progressBar').style.width = percent + '%';
-            document.getElementById('statsText').innerText = `${doneCount}/${inventory.length} Item Terpenuhi (${percent}%)`;
-            
-            // Re-apply search filter setelah render ulang
-            searchBarang();
+            document.getElementById('statsText').innerText = `${doneCount}/${inventory.length} Item`;
+            document.getElementById('percentText').innerText = percent + '%';
         }
 
         function toggle(idx) { inventory[idx].done = !inventory[idx].done; save(); }
-        
-        function remove(idx) { 
-            if(confirm('Hapus item ini dari daftar?')) { 
-                inventory.splice(idx, 1); 
-                save(); 
-            } 
-        }
+        function remove(idx) { if(confirm('Hapus item?')) { inventory.splice(idx, 1); save(); } }
         
         function addItem() {
             const n = document.getElementById('newItemName').value;
             const q = document.getElementById('newItemQty').value || "1";
-            if(!n) return alert("Nama barang tidak boleh kosong!");
-            inventory.push({ id: Date.now(), n, q, done: false });
+            const c = document.getElementById('newItemCat').value;
+            if(!n) return alert("Nama barang kosong!");
+            inventory.push({ id: Date.now(), n, q, c, done: false });
             document.getElementById('newItemName').value = "";
-            document.getElementById('newItemQty').value = "";
             save();
         }
 
         function resetData() {
-            if(confirm("PERINGATAN: Semua progres akan hilang dan data akan kembali ke awal. Lanjutkan?")) {
+            if(confirm("Reset semua data?")) {
                 localStorage.clear();
                 inventory = initialData.map((d, i) => ({...d, id: Date.now() + i, done: false}));
                 save();
@@ -292,56 +212,28 @@
         }
 
         function downloadJPG() {
-            const area = document.getElementById('main-list');
-            html2canvas(area, { scale: 2, backgroundColor: '#f1f5f9' }).then(canvas => {
+            html2canvas(document.getElementById('main-list'), { scale: 2 }).then(canvas => {
                 const a = document.createElement('a');
-                a.download = 'Logistik_Gorda_Update.jpg';
-                a.href = canvas.toDataURL('image/jpeg', 0.9);
+                a.download = `Checklist_Gorda_${currentTab}.jpg`;
+                a.href = canvas.toDataURL('image/jpeg');
                 a.click();
             });
         }
 
-        async function generatePDF() {
+        function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            doc.text("LAPORAN INVENTORY GORDA", 105, 20, {align:"center"});
+            let y = 30;
+            doc.setFontSize(10);
             
-            doc.setFontSize(16);
-            doc.setTextColor(30, 27, 75); // Indigo-900
-            doc.text("LAPORAN PERSIAPAN INVENTORY GORDA", 105, 20, { align: "center" });
-            
-            let y = 35;
-            
-            // Bagian Belum Siap
-            doc.setFontSize(11);
-            doc.setTextColor(220, 38, 38); // Red-600
-            doc.text("BELUM TERSEDIA / MASIH KURANG:", 20, y);
-            y += 8;
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(9);
-            
-            inventory.filter(i => !i.done).forEach(item => {
+            inventory.forEach(item => {
                 if(y > 280) { doc.addPage(); y = 20; }
-                doc.text(`[ ] ${item.n} - ${item.q}`, 25, y);
-                y += 6;
+                const status = item.done ? "[V]" : "[ ]";
+                doc.text(`${status} ${item.n} (${item.q}) - [${item.c}]`, 20, y);
+                y += 7;
             });
-
-            y += 10;
-            
-            // Bagian Sudah Siap
-            doc.setFontSize(11);
-            doc.setTextColor(5, 150, 105); // Emerald-600
-            doc.text("SUDAH SIAP / TERSEDIA:", 20, y);
-            y += 8;
-            doc.setTextColor(100, 100, 100);
-            doc.setFontSize(9);
-
-            inventory.filter(i => i.done).forEach(item => {
-                if(y > 280) { doc.addPage(); y = 20; }
-                doc.text(`[V] ${item.n} - ${item.q}`, 25, y);
-                y += 6;
-            });
-
-            doc.save("Laporan_Logistik_Gorda.pdf");
+            doc.save("Laporan_Gorda.pdf");
         }
 
         window.onload = render;
