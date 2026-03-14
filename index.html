@@ -71,39 +71,142 @@
     <script>
         // Data Gabungan dari PDF & Input List User 
         const initialData = [
-            { n: "Dispenser (Minjem Gontor 2) (Transit)", q: "1" },
-            { n: "Dispenser (Minjem Gontor 2) (Kamar Panjimas)", q: "1" },
-            { n: "Tempat Gula Kaca (Minjem Gorda)", q: "1" },
-            { n: "Tempat Kopi Kaca (Minjem Gorda)", q: "1" },
-            { n: "Alas Minuman Saset (Minjem Gorda)", q: "2" },
-            { n: "Taplak Batik (Qoah)", q: "2" },
-            { n: "Taplak Batik (Transit)", q: "3" },
-            { n: "Tempat Kotak Tisu", q: "6" },
-            { n: "Sendok Makan Besi", q: "25 (-20)" },
-            { n: "Tudung Saji", q: "3" },
+            /* =========================
+               FURNITUR & PERABOT
+            ========================= */
+            
+            { n: "Sofa Pimpinan Panjang (Qoah)", q: "-" },
+            { n: "Sofa Pimpinan Pendek (Qoah)", q: "-" },
+            { n: "Meja Pimpinan Panjang (Qoah)", q: "1" },
+            { n: "Meja Pimpinan Pendek (Qoah)", q: "1" },
+            { n: "Sofa (Muat 6 Orang) (Transit)", q: "Fleksibel" },
+            { n: "Meja Pimpinan (Transit)", q: "3" },
+            { n: "Meja (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5" },
+            { n: "Kursi Futura (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5" },
+            { n: "Sarung Kursi (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5" },
+            { n: "Meja KMI", q: "11" },
+            { n: "Kursi Futura", q: "15" },
+            { n: "Kasur", q: "Fleksibel" },
+            { n: "Jemuran Baju", q: "3" },
+            { n: "Kulkas", q: "-" },
+            { n: "Dispenser", q: "3" },
+            
+            /* =========================
+               DEKORASI & INTERIOR
+            ========================= */
+            
+            { n: "Taplak Meja Gontor 2 Direktur KMI, Wapeng dan Wadir Gontor 2", q: "3" },
+            { n: "Taplak Meja Panjimas", q: "11" },
+            { n: "Taplak Emas (Qoah)", q: "3" },
+            { n: "Taplak Emas (Transit)", q: "3" },
+            { n: "Cermin Amen Gorda (Transit)", q: "2" },
+            { n: "Cermin Amen Gorda (Kamar)", q: "2" },
+            { n: "Gorden", q: "10" },
+            { n: "Tulisan Password Wifi Di Transit", q: "3" },
+            
+            /* =========================
+               PERALATAN MAKAN
+            ========================= */
+            
+            { n: "Piring Ceper Pimpinan", q: "3" },
+            { n: "Piring Ceper (Transit)", q: "3" },
+            { n: "Piring Makan Biasa Penguji", q: "25" },
+            { n: "Piring Biasa Buat Toam Bal-Balan Kelas 6", q: "40" },
+            { n: "Gelas Tangkai", q: "3" },
+            { n: "Tutup Gelas Tangkai", q: "3" },
+            { n: "Sendok Makan Besi", q: "25" },
+            { n: "Sendok Plastik Besar", q: "5 Slop" },
+            { n: "Sendok Plastik Kecil", q: "4 Pack" },
+            { n: "Nampan", q: "4" },
             { n: "Mangkuk", q: "25" },
-            { n: "Sendok Bebek", q: "25" },
+            { n: "Tudung Saji", q: "3" },
+            { n: "Tempat Amidas Gelas", q: "6" },
+            
+            /* =========================
+               KONSUMSI & MINUMAN
+            ========================= */
+            
+            { n: "Amidas Gelas 220 ml", q: "90 Dus" },
+            { n: "Amidas Botol 600 ml", q: "5 Dus" },
+            { n: "Amidas Galon", q: "15 Galon" },
             { n: "Galon (Transit, Panjimas dan Kelas 6)", q: "16" },
+            { n: "Bal-Balan Pedes", q: "2 Bal (Fleksibel)" },
+            { n: "Bal-Balan Gurih", q: "8 Bal (Fleksibel)" },
+            { n: "Bal-Balan Manis", q: "3 Bal (Fleksibel)" },
+            { n: "Parcel Buah", q: "9 Parcel tiap ujian" },
+            { n: "Toam Toples Ust Suyuh", q: "6-8 Jenis" },
+            { n: "Snak DDC", q: "Fleksibel" },
+            { n: "Minuman Saset Panitia", q: "Fleksibel" },
+            { n: "Minuman Kulkas", q: "Fleksibel" },
+            { n: "Aneka Minuman Saset", q: "Fleksibel" },
+            { n: "Aneka Suplemen Kesehatan", q: "Fleksibel" },
+            
+            /* =========================
+               KEBERSIHAN
+            ========================= */
+            
+            { n: "Sapu Kamar (Ijuk)", q: "Fleksibel" },
+            { n: "Sapu Lidi", q: "Fleksibel" },
+            { n: "Pel Pelan", q: "4" },
+            { n: "Superpel", q: "2" },
+            { n: "Sikat WC", q: "5" },
+            { n: "Vixal", q: "5" },
+            { n: "Rinso", q: "2" },
+            { n: "Sikat Cuci Baju", q: "2" },
+            { n: "Tempat Sampah (Transit + Kamar Mandi Transit)", q: "8" },
+            { n: "Tempat Sampah Gedhe (Kamar Panjimas)", q: "3" },
             { n: "Kresek Sampah (Kamar Panjimas)", q: "4" },
             { n: "Kresek Sampah (Transit)", q: "2" },
             { n: "Kresek Bontrot (Transit)", q: "5 Pack" },
+            
+            /* =========================
+               KAMAR MANDI
+            ========================= */
+            
+            { n: "Sabun Mandi Cair Besar (Kamar Mandi Transit)", q: "2" },
+            { n: "Sabun Mandi Cair Besar (Kamar Mandi Panjimas)", q: "3" },
+            { n: "Sabun Muka", q: "3" },
+            { n: "Sabun Cuci Tangan", q: "1" },
+            { n: "Odol", q: "3" },
+            { n: "Sikat Gigi", q: "6" },
+            { n: "Listerin", q: "3" },
+            { n: "Handuk (Kamar Mandi Transit)", q: "2" },
+            { n: "Handuk (Kamar Mandi Panjimas)", q: "5" },
+            { n: "Handuk Lap di Washtafle", q: "1" },
+            { n: "Pengharum Ruangan", q: "2" },
+            { n: "Pengharum Ruangan (Kamar Panjimas)", q: "1" },
+            { n: "Pengharum Kamar Mandi (Kamar Mandi Transit)", q: "2" },
+            { n: "Kapur Barus (Kamar Mandi Transit)", q: "6" },
+            { n: "Kapur Barus (Kamar Mandi Panjimas)", q: "3" },
+            { n: "Ember Tempat Air (Kamar Mandi Panjimas)", q: "2" },
+            { n: "Gayung (Kamar Mandi Panjimas)", q: "2" },
+            
+            /* =========================
+               PERLENGKAPAN UMUM
+            ========================= */
+            
+            { n: "Terminal Listrik (Transit)", q: "1" },
+            { n: "Terminal Listrik (Kamar)", q: "Fleksibel" },
+            { n: "Paku Payung", q: "Fleksibel" },
+            { n: "Hanger", q: "30" },
+            { n: "Gantungan Baju (Kamar Mandi Transit)", q: "2" },
+            { n: "Gantungan Baju Di Dalam Kamar Panjimas", q: "7" },
+            { n: "Gantungan Di Kamar Mandi (Kamar Mandi Panjimas)", q: "3" },
+            { n: "Tisu Kotak Kardus", q: "20 (-10)" },
+            { n: "Tisu Kecil Tepos", q: "50" },
+            { n: "Tisu Besar (Transit)", q: "1" },
+            { n: "Tisu Besar (Kamar Panjimas)", q: "3" },
+            { n: "Tisu Besar (Tempat Refill Konsumtor)", q: "2" },
+            { n: "Plastik Wrapping", q: "3" },
             { n: "Toples (Transit)", q: "10" },
             { n: "Toples Rodong (Kamar Panjimas)", q: "4" },
             { n: "Rodong Krupuk (Transit)", q: "1" },
-            { n: "Gelas Kertas (Kamar Panjimas)", q: "8 Slop" },
-            { n: "Gelas Kertas (Transit)", q: "5 Slop" },
-            { n: "Gelas Plastik (Kamar Panjimas)", q: "5 Slop" },
-            { n: "Sendok Plastik Besar", q: "5 Slop" },
-            { n: "Pengharum Ruangan", q: "2" },
-            { n: "Kapur Barus (Kamar Mandi Transit)", q: "6" },
-            { n: "Handuk (Kamar Mandi Panjimas)", q: "5" },
-            { n: "Amidas Botol 600 ml", q: "5 Dus" },
-            { n: "Amidas Gelas 220 ml", q: "90 Dus" },
-            { n: "Amidas Galon", q: "15 Galon" },
-            { n: "Parcel Buah Sekali Ujian", q: "9 Parcel" },
-            { n: "Ember Tempat Air (Kamar Mandi Panjimas)", q: "2" },
-            { n: "Gayung (Kamar Mandi Panjimas)", q: "2" },
-            { n: "Pemanggang Roti", q: "1" }
+            { n: "Tempat Minuman Saset (Kamar Panjimas)", q: "1" },
+            { n: "Tempat Kopi (Kamar Panjimas)", q: "1" },
+            { n: "Pisau Selai", q: "2" },
+            { n: "Pisau Potong", q: "2" },
+            { n: "Asbak", q: "3" },
+            { n: "Pemanggang Roti", q: "2" }
         ];
 
         let inventory = JSON.parse(localStorage.getItem('gorda_v3')) || initialData.map((d, i) => ({...d, id: Date.now() + i, done: false}));
