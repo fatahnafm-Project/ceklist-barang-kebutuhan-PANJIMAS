@@ -3,145 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gorda Inventory System - Student Admission Committee</title>
+    <title>Gorda Inventory System - 121 Items</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .checked-item { background-color: #f0fdf4; border-left: 4px solid #22c55e; opacity: 0.7; }
-        .unchecked-item { background-color: white; border-left: 4px solid #ef4444; }
-        .tab-active { background-color: #4338ca; color: white; }
+        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
+        .checked-item { background-color: #ecfdf5; border-left: 4px solid #10b981; opacity: 0.8; }
+        .unchecked-item { background-color: white; border-left: 4px solid #6366f1; }
+        .tab-active { background-color: #1e1b4b; color: white; }
     </style>
 </head>
 <body class="pb-20">
 
-    <div class="bg-indigo-900 text-white p-5 shadow-2xl sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto text-center mb-4">
-            <h2 class="text-sm tracking-widest uppercase font-bold">Student Admission Committee</h2>
-            <h1 class="text-lg font-black uppercase">Inventory Gorda - ITTC Gontor</h1>
-            <p class="text-[10px] opacity-60">Office: Pakistan Building Second Floor 201</p>
+    <div class="bg-indigo-950 text-white p-6 shadow-xl sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-end">
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">STUDENT ADMISSION COMMITTEE</h1>
+                <p class="text-xs opacity-70">Inventory Persiapan Gorda | Total 121 Item</p>
+            </div>
+            <div class="text-right">
+                <span id="percentText" class="text-3xl font-black text-indigo-400">0%</span>
+            </div>
         </div>
-        <div class="max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-2">
-                <p id="statsText" class="text-[10px] font-mono uppercase">0/0 Item Terpenuhi</p>
-                <span id="percentText" class="text-xl font-black text-emerald-400">0%</span>
+        <div class="max-w-4xl mx-auto mt-4">
+            <div class="w-full bg-indigo-900 rounded-full h-2.5">
+                <div id="progressBar" class="bg-indigo-400 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <div class="w-full bg-indigo-950 rounded-full h-2">
-                <div id="progressBar" class="bg-emerald-400 h-2 rounded-full transition-all duration-700" style="width: 0%"></div>
-            </div>
+            <p id="statsText" class="text-[10px] mt-2 font-mono uppercase tracking-widest text-center">Menghitung data...</p>
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto p-4 mt-2">
-        <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 space-y-4">
-            <input type="text" id="searchInput" onkeyup="render()" placeholder="Cari barang atau nomor..." 
-                   class="w-full px-4 py-3 bg-slate-50 rounded-xl outline-none border border-slate-100 text-sm">
-
-            <div class="flex gap-2 overflow-x-auto pb-2" id="tabContainer">
-                <button onclick="switchTab('SEMUA')" id="btn-SEMUA" class="tab-active px-4 py-2 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap transition-all">Semua</button>
-                <button onclick="switchTab('PERLENGKAPAN')" id="btn-PERLENGKAPAN" class="bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap">Perlengkapan</button>
-                <button onclick="switchTab('ADAWAT')" id="btn-ADAWAT" class="bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap">Adawat</button>
-                <button onclick="switchTab('KONSUMSI')" id="btn-KONSUMSI" class="bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap">Konsumsi</button>
-                <button onclick="switchTab('PERSONAL')" id="btn-PERSONAL" class="bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap">Mandi & Personal</button>
-                <button onclick="switchTab('KEBERSIHAN')" id="btn-KEBERSIHAN" class="bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-[10px] font-bold uppercase whitespace-nowrap">Kebersihan</button>
+    <div class="max-w-4xl mx-auto p-4">
+        <div class="bg-white p-4 rounded-2xl shadow-md mb-6 space-y-4">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                <input type="text" id="searchInput" onkeyup="render()" placeholder="Cari nama barang atau nomor ID..." 
+                       class="w-full pl-11 pr-4 py-3 bg-slate-50 rounded-xl outline-none border border-slate-200 text-sm focus:ring-2 ring-indigo-500">
+            </div>
+            <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                <button onclick="switchTab('SEMUA')" id="btn-SEMUA" class="tab-active px-5 py-2 rounded-full text-[11px] font-bold uppercase whitespace-nowrap shadow-sm">Semua</button>
+                <button onclick="switchTab('PERLENGKAPAN')" id="btn-PERLENGKAPAN" class="bg-slate-100 text-slate-500 px-5 py-2 rounded-full text-[11px] font-bold uppercase whitespace-nowrap">Perlengkapan</button>
+                <button onclick="switchTab('DAPUR')" id="btn-DAPUR" class="bg-slate-100 text-slate-500 px-5 py-2 rounded-full text-[11px] font-bold uppercase whitespace-nowrap">Dapur & Makan</button>
+                <button onclick="switchTab('KONSUMSI')" id="btn-KONSUMSI" class="bg-slate-100 text-slate-500 px-5 py-2 rounded-full text-[11px] font-bold uppercase whitespace-nowrap">Konsumsi</button>
+                <button onclick="switchTab('PERSONAL')" id="btn-PERSONAL" class="bg-slate-100 text-slate-500 px-5 py-2 rounded-full text-[11px] font-bold uppercase whitespace-nowrap">Personal & Mandi</button>
+                <button onclick="switchTab('KEBERSIHAN')" id="btn-KEBERSIHAN" class="bg-slate-100 text-slate-500 px-5 py-2 rounded-full text-[11px] font-bold uppercase whitespace-nowrap">Kebersihan</button>
             </div>
         </div>
 
-        <div class="flex gap-2 mb-6">
-            <button onclick="downloadJPG()" class="flex-1 bg-indigo-600 text-white p-3 rounded-xl text-xs font-bold shadow-md">
-                <i class="fas fa-image mr-2"></i> JPG
+        <div class="flex gap-3 mb-6">
+            <button onclick="downloadJPG()" class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition">
+                <i class="fas fa-camera text-indigo-500 mr-2"></i> SIMPAN GAMBAR
             </button>
-            <button onclick="generatePDF()" class="flex-1 bg-rose-600 text-white p-3 rounded-xl text-xs font-bold shadow-md">
-                <i class="fas fa-file-pdf mr-2"></i> PDF LAPORAN
+            <button onclick="generatePDF()" class="flex-1 bg-white border border-slate-200 p-3 rounded-xl text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition">
+                <i class="fas fa-file-pdf text-rose-500 mr-2"></i> DOWNLOAD PDF
             </button>
         </div>
 
-        <div id="main-list" class="space-y-3"></div>
+        <div id="main-list" class="space-y-3">
+            </div>
     </div>
 
     <script>
         let currentTab = 'SEMUA';
         
-        const initialData = [
-            // PERLENGKAPAN (MEBEL & RUANG) 
+        const rawData = [
             { n: "Sofa Pimpinan Panjang (Qoah)", q: "1", c: "PERLENGKAPAN" },
             { n: "Sofa Pimpinan Pendek (Qoah)", q: "1", c: "PERLENGKAPAN" },
             { n: "Meja Pimpinan Panjang (Qoah)", q: "1", c: "PERLENGKAPAN" },
             { n: "Meja Pimpinan Pendek (Qoah)", q: "1", c: "PERLENGKAPAN" },
-            { n: "Sofa (Muat 6 Orang) (Transit)", q: "Fleksibel", c: "PERLENGKAPAN" },
-            { n: "Meja Pimpinan (Transit)", q: "3", c: "PERLENGKAPAN" },
-            { n: "Meja (Direktur KMI, Wapeng, Wadir G2)", q: "5", c: "PERLENGKAPAN" },
-            { n: "Kursi Futura (Direktur KMI, Wapeng, Wadir G2)", q: "5", c: "PERLENGKAPAN" },
+            { n: "Sofa (Muat Buat Orang 6) (Transit)", q: "Fleksible", c: "PERLENGKAPAN" },
+            { n: "Meja pimpinan (Transit)", q: "3", c: "PERLENGKAPAN" },
+            { n: "Taplak Meja (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "3", c: "PERLENGKAPAN" },
+            { n: "Meja (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5", c: "PERLENGKAPAN" },
+            { n: "Kursi Futura (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5", c: "PERLENGKAPAN" },
+            { n: "Sarung Kursi (Direktur KMI, Wapeng dan Wadir Gontor 2)", q: "5", c: "PERLENGKAPAN" },
+            { n: "Terminal Listrik (Transit)", q: "1", c: "PERLENGKAPAN" },
+            { n: "Teminal (Kamar Panjimas)", q: "Sebanyaknya", c: "PERLENGKAPAN" },
             { n: "Meja KMI 11", q: "11", c: "PERLENGKAPAN" },
-            { n: "Terminal Listrik (Transit/Kamar)", q: "Sebanyaknya", c: "PERLENGKAPAN" },
-            { n: "Gorden (Transit & Kamar Panjimas)", q: "10", c: "PERLENGKAPAN" },
-            { n: "Cermin Amen Gorda (Transit & Kamar)", q: "2", c: "PERLENGKAPAN" },
-            { n: "Jemuran Baju Amen Gorda", q: "3", c: "PERLENGKAPAN" },
-            { n: "Kasur", q: "Fleksibel", c: "PERLENGKAPAN" },
-
-            // ADAWAT (ALAT MAKAN & PINJAMAN) 
-            { n: "Kulkas", q: "1", c: "ADAWAT" },
-            { n: "Piring Ceper (Pimpinan & Transit)", q: "6", c: "ADAWAT" },
-            { n: "Gelas Tangkai & Tutup", q: "3 Set", c: "ADAWAT" },
-            { n: "Piring Makan Biasa Penguji", q: "25", c: "ADAWAT" },
-            { n: "Piring Biasa Toam Bal-balan Kls 6", q: "50", c: "ADAWAT" },
-            { n: "Sendok Makan Besi", q: "25 (-20)", c: "ADAWAT" },
-            { n: "Sendok Bebek", q: "25", c: "ADAWAT" },
-            { n: "Mangkuk", q: "25", c: "ADAWAT" },
-            { n: "Nampan", q: "2", c: "ADAWAT" },
-            { n: "Dispenser (Minjem Gontor 2)", q: "2", c: "ADAWAT" },
-            { n: "Tempat Gula & Kopi Kaca (Minjem)", q: "2", c: "ADAWAT" },
-            { n: "Pisau Potong & Pisau Selai", q: "4", c: "ADAWAT" },
-            { n: "Tudung Saji", q: "3", c: "ADAWAT" },
-            { n: "Pemanggang Roti", q: "2", c: "ADAWAT" },
-
-            // KONSUMSI (MAKANAN & MINUMAN) 
-            { n: "Amidas Gelas 220 ml", q: "90 Dus", c: "KONSUMSI" },
-            { n: "Amidas Botol 600 ml", q: "5 Dus", c: "KONSUMSI" },
-            { n: "Amidas Galon (Panitia, Transit, Kls 6)", q: "15 Galon", c: "KONSUMSI" },
-            { n: "Bal-Balan Pedes, Gurih, Manis", q: "13 Bal", c: "KONSUMSI" },
-            { n: "Toam Toples Ust Suyuh (Khusus)", q: "6-8 Jenis", c: "KONSUMSI" },
-            { n: "Parcel Buah", q: "9 Tiap Ujian", c: "KONSUMSI" },
-            { n: "Snak DDC & Minuman Saset", q: "Fleksibel", c: "KONSUMSI" },
-            { n: "Gelas Kertas & Plastik", q: "23 Slop", c: "KONSUMSI" },
-            { n: "Sendok Plastik Besar & Kecil", q: "9 Pack", c: "KONSUMSI" },
-
-            // PERSONAL (MANDI & GANTUNGAN) 
-            { n: "Handuk (Transit & Panjimas)", q: "7", c: "PERSONAL" },
-            { n: "Sabun Mandi Cair Besar", q: "5", c: "PERSONAL" },
-            { n: "Sabun Muka & Cuci Tangan", q: "4", c: "PERSONAL" },
-            { n: "Odol, Sikat Gigi, Listerin", q: "12", c: "PERSONAL" },
-            { n: "Minyak Rambut & Parfum", q: "4 Jenis", c: "PERSONAL" },
-            { n: "Sisir", q: "4", c: "PERSONAL" },
-            { n: "Gantungan Baju & Hanger", q: "42", c: "PERSONAL" },
-            { n: "Keset Hamam & Welcome", q: "8", c: "PERSONAL" },
-
-            // KEBERSIHAN 
-            { n: "Sapu Kamar & Sapu Lidi", q: "Fleksibel", c: "KEBERSIHAN" },
-            { n: "Pel Pelan & Superpel", q: "6", c: "KEBERSIHAN" },
-            { n: "Vixal & Sikat WC", q: "10", c: "KEBERSIHAN" },
-            { n: "Tisu Kotak & Tisu Kecil Tepos", q: "70", c: "KEBERSIHAN" },
-            { n: "Tisu Besar (Transit & Kamar)", q: "6", c: "KEBERSIHAN" },
-            { n: "Kresek Sampah & Bontrot", q: "11 Pack", c: "KEBERSIHAN" },
-            { n: "Pengharum Ruangan & WC", q: "5", c: "KEBERSIHAN" },
-            { n: "Kapur Barus", q: "9", c: "KEBERSIHAN" },
-            { n: "Rinso & Sikat Cuci", q: "4", c: "KEBERSIHAN" },
-            { n: "Tempat Sampah (Transit & Kamar)", q: "11", c: "KEBERSIHAN" }
+            { n: "Taplak Meja Panjimas 11", q: "11", c: "PERLENGKAPAN" },
+            { n: "Cermin Amen Gorda (Transit)", q: "1", c: "PERLENGKAPAN" },
+            { n: "Cermin Amen Gorda (Kamar Panjimas)", q: "1", c: "PERLENGKAPAN" },
+            { n: "Gorden (Transit)", q: "4", c: "PERLENGKAPAN" },
+            { n: "Gorden (Kamar Panjimas)", q: "6", c: "PERLENGKAPAN" },
+            { n: "Paku Payung", q: "Sebanyaknya", c: "PERLENGKAPAN" },
+            { n: "Jumuran Baju Amen Gorda", q: "3", c: "PERLENGKAPAN" },
+            { n: "Kasur", q: "Fleksible", c: "PERLENGKAPAN" },
+            { n: "Sapu Kamar", q: "Sebanyaknya", c: "KEBERSIHAN" },
+            { n: "Sapu Lidi", q: "Fleksible", c: "KEBERSIHAN" },
+            { n: "Kulkas", q: "1", c: "DAPUR" },
+            { n: "Piring Ceper Pimpinan", q: "3", c: "DAPUR" },
+            { n: "Piring Ceper 3 (Transit)", q: "3", c: "DAPUR" },
+            { n: "Gelas Tangkai", q: "3", c: "DAPUR" },
+            { n: "Tutup Gelas Tangkai", q: "3", c: "DAPUR" },
+            { n: "Tisu Kotak Kardus (Qoah)", q: "3", c: "KEBERSIHAN" },
+            { n: "Taplak Emas (Qoah)", q: "2", c: "PERLENGKAPAN" },
+            { n: "Taplak Emas (Transit)", q: "3", c: "PERLENGKAPAN" },
+            { n: "Plastik Warapping", q: "1", c: "DAPUR" },
+            { n: "Tempat Sampah (Transit + Kamar Mandi Transit)", q: "8", c: "KEBERSIHAN" },
+            { n: "Tempat Sampah Gedhe (Kamar Panjimas)", q: "3", c: "KEBERSIHAN" },
+            { n: "Piring Makan Biasa Penguji (Transit)", q: "25", c: "DAPUR" },
+            { n: "Piring Biasa Buat Toam Bal Balan Kls 6 (Jml 40)", q: "50", c: "DAPUR" },
+            { n: "Tisu Kotak Kardus", q: "6", c: "KEBERSIHAN" },
+            { n: "Tempat Amidas Gelas", q: "4", c: "DAPUR" },
+            { n: "Nampan", q: "2", c: "DAPUR" },
+            { n: "Tulisan Password Wifi Di Transit", q: "1", c: "PERLENGKAPAN" },
+            { n: "Dispenser (Minjem Gontor 2) (Transit)", q: "1", c: "DAPUR" },
+            { n: "Dispenser (Minjem Gontor 2) (Kamar Panjimas)", q: "1", c: "DAPUR" },
+            { n: "Tempat Gula Kaca (Minjem Gorda)", q: "1", c: "DAPUR" },
+            { n: "Tempat Kopi Kaca (Minjem Gorda)", q: "1", c: "DAPUR" },
+            { n: "Alas Minuman Saset (Minjem Gorda)", q: "2", c: "DAPUR" },
+            { n: "Taplak Batik (Qoah)", q: "2", c: "PERLENGKAPAN" },
+            { n: "Taplak Batik (Transit)", q: "3", c: "PERLENGKAPAN" },
+            { n: "Tempat Kotak Tisu", q: "6", c: "DAPUR" },
+            { n: "Sendok Makan Besi", q: "25 (-20)", c: "DAPUR" },
+            { n: "Tudung Saji", q: "3", c: "DAPUR" },
+            { n: "Mangkuk", q: "25", c: "DAPUR" },
+            { n: "Sendok Bebek 25", q: "25", c: "DAPUR" },
+            { n: "Galon (Transit, Panjimas dan Kelas 6)", q: "16", c: "KONSUMSI" },
+            { n: "Kresek Sampah (Kamar Panjimas)", q: "4", c: "KEBERSIHAN" },
+            { n: "Kresek Sampah (Transit)", q: "2", c: "KEBERSIHAN" },
+            { n: "Kresek Bontrot (Transit)", q: "5 Pack", c: "KEBERSIHAN" },
+            { n: "Toples (Transit)", q: "10", c: "DAPUR" },
+            { n: "Toples Rodong (Kamar Panjimas)", q: "4", c: "DAPUR" },
+            { n: "Rodong Krupuk (Transit)", q: "1", c: "DAPUR" },
+            { n: "Tempat Minuman Saset (Kamar Panjimas)", q: "1", c: "DAPUR" },
+            { n: "Gelas Kertas (Kamar Panjimas)", q: "8 Slop", c: "KONSUMSI" },
+            { n: "Gelas Kertas (Transit)", q: "5 Slop", c: "KONSUMSI" },
+            { n: "Gelas Plastik (Kamar Panjimas)", q: "5 Slop", c: "KONSUMSI" },
+            { n: "Gelas Plastik (Refill Konsumtor)", q: "5 Slop", c: "KONSUMSI" },
+            { n: "Tutup Gelas Plastik (Refill Konsumtor)", q: "5 Slop", c: "KONSUMSI" },
+            { n: "Sendok Plastik Besar", q: "5 Slop", c: "KONSUMSI" },
+            { n: "Sendok Plastik Kecil", q: "4 Pack", c: "KONSUMSI" },
+            { n: "Pengharum Ruangan", q: "2", c: "KEBERSIHAN" },
+            { n: "Pengharum Kamar Mandi (Transit)", q: "2", c: "KEBERSIHAN" },
+            { n: "Pengharum Ruangan (Kamar Panjimas)", q: "1", c: "KEBERSIHAN" },
+            { n: "Kapur Barus (Kamar Mandi Transit)", q: "6", c: "KEBERSIHAN" },
+            { n: "Kapur Barus (Kamar Mandi Panjimas)", q: "3", c: "KEBERSIHAN" },
+            { n: "Sisir (Kamar Mandi Transit)", q: "1", c: "PERSONAL" },
+            { n: "Sisir (Kamar Panjimas)", q: "3", c: "PERSONAL" },
+            { n: "Pisau Selai", q: "2", c: "DAPUR" },
+            { n: "Asbak", q: "3", c: "PERLENGKAPAN" },
+            { n: "Tempat Kopi (Kamar Panjimas)", q: "1", c: "DAPUR" },
+            { n: "Minyak Rambut (Gatsby, Kemiri, Pomade)", q: "1", c: "PERSONAL" },
+            { n: "Parfum", q: "3 Jenis", c: "PERSONAL" },
+            { n: "Gantungan Baju (Kamar Mandi Transit)", q: "2", c: "PERSONAL" },
+            { n: "Gantungan Baju Di Dalam Kamar Panjimas", q: "7", c: "PERSONAL" },
+            { n: "Gantungan Di Kamar Mandi (Panjimas)", q: "3", c: "PERSONAL" },
+            { n: "Handuk (Kamar Mandi Transit)", q: "2", c: "PERSONAL" },
+            { n: "Handuk (Kamar Mandi Panjimas)", q: "5", c: "PERSONAL" },
+            { n: "Handuk Lap di Washtafle", q: "1", c: "PERSONAL" },
+            { n: "Sabun Mandi Cair Besar (Transit)", q: "2", c: "PERSONAL" },
+            { n: "Sabun Mandi Cair Besar (Panjimas)", q: "3", c: "PERSONAL" },
+            { n: "Sabun Muka", q: "3", c: "PERSONAL" },
+            { n: "Sabun Cuci Tangan", q: "1", c: "PERSONAL" },
+            { n: "Keset Hamam (Transit)", q: "1", c: "PERSONAL" },
+            { n: "Keset Hamam (Kamar Panjimas)", q: "1", c: "PERSONAL" },
+            { n: "Keset Welcome (Transit)", q: "2", c: "PERSONAL" },
+            { n: "Keset Welcome (Kamar Panjimas)", q: "4", c: "PERSONAL" },
+            { n: "Odol", q: "3", c: "PERSONAL" },
+            { n: "Sikat Gigi", q: "6", c: "PERSONAL" },
+            { n: "Listerin", q: "3", c: "PERSONAL" },
+            { n: "Rinso", q: "2", c: "KEBERSIHAN" },
+            { n: "Sikat Cuci Baju", q: "2", c: "KEBERSIHAN" },
+            { n: "Vixal", q: "5", c: "KEBERSIHAN" },
+            { n: "Sikat WC", q: "5", c: "KEBERSIHAN" },
+            { n: "Hanger", q: "30", c: "PERSONAL" },
+            { n: "Pisau Potong", q: "2", c: "DAPUR" },
+            { n: "Pel pelan", q: "4", c: "KEBERSIHAN" },
+            { n: "Superpel", q: "2", c: "KEBERSIHAN" },
+            { n: "Tisu Kotak Kardus (Stok)", q: "20 (-10)", c: "KEBERSIHAN" },
+            { n: "Tisu Kecil Tepos", q: "50", c: "KEBERSIHAN" },
+            { n: "Tisu Besar (Transit)", q: "1", c: "KEBERSIHAN" },
+            { n: "Tisu Besar (Kamar Panjimas)", q: "3", c: "KEBERSIHAN" },
+            { n: "Tisu Besar (Tempat Refill Konsumtor)", q: "2", c: "KEBERSIHAN" },
+            { n: "Bal-Balan Pedes (Kls 6 & Panitia)", q: "2 Bal (Fleksibel)", c: "KONSUMSI" },
+            { n: "Bal-Balan Gurih (Kls 6 & Panitia)", q: "8 Bal (Fleksibel)", c: "KONSUMSI" },
+            { n: "Bal-Balan Manis (Kls 6 & Panitia)", q: "3 Bal (Fleksibel)", c: "KONSUMSI" },
+            { n: "Toam Toples Ust Suyuh (Khusus)", q: "6-8 Jenis (Fleksibel)", c: "KONSUMSI" },
+            { n: "Amidas Botol 600 ml (Kebutuhan 10 Hari)", q: "5 Dus", c: "KONSUMSI" },
+            { n: "Amidas Gelas 220 ml (Kebutuhan 10 Hari)", q: "90 Dus", c: "KONSUMSI" },
+            { n: "Amidas Galon (Kamar Panitia & Transit)", q: "15 Galon", c: "KONSUMSI" },
+            { n: "Parcel Buah Sekali Ujian", q: "9 Parcel Tiap Ujian", c: "KONSUMSI" },
+            { n: "Snak DDC (Kebutuhan 13 Hari)", q: "Fleksible", c: "KONSUMSI" },
+            { n: "Minuman saset panitia (Kebutuhan 13 Hari)", q: "Fleksible", c: "KONSUMSI" },
+            { n: "Suplemen kesehatan panitia (Kebutuhan 13 Hari)", q: "Fleksible", c: "KONSUMSI" },
+            { n: "Minuman Kulkas (Kebutuhan 13 Hari)", q: "Fleksible", c: "KONSUMSI" },
+            { n: "Aneka Minuman Saset", q: "Fleksible", c: "KONSUMSI" },
+            { n: "Aneka Suplemen Kesehatan", q: "Fleksible", c: "KONSUMSI" },
+            { n: "Ember Tempat Air (Kamar Mandi Panjimas)", q: "2", c: "PERLENGKAPAN" },
+            { n: "Gayung (Kamar Mandi Panjimas)", q: "2", c: "PERLENGKAPAN" },
+            { n: "Pemanggang Roti", q: "1", c: "DAPUR" }
         ];
 
-        let inventory = JSON.parse(localStorage.getItem('gorda_sac_v1')) || initialData.map((d, i) => ({...d, id: i + 1, done: false}));
+        let inventory = JSON.parse(localStorage.getItem('gorda_121_items')) || rawData.map((d, i) => ({...d, id: i + 1, done: false}));
 
         function save() {
-            localStorage.setItem('gorda_sac_v1', JSON.stringify(inventory));
+            localStorage.setItem('gorda_121_items', JSON.stringify(inventory));
             render();
         }
 
         function switchTab(cat) {
             currentTab = cat;
-            document.querySelectorAll('#tabContainer button').forEach(btn => btn.classList.remove('tab-active'));
+            document.querySelectorAll('#tabContainer button').forEach(btn => {
+                btn.classList.remove('tab-active', 'bg-indigo-950', 'text-white');
+                btn.classList.add('bg-slate-100', 'text-slate-500');
+            });
             document.getElementById('btn-' + cat).classList.add('tab-active');
             render();
         }
@@ -152,21 +221,25 @@
             list.innerHTML = "";
             
             let doneCount = inventory.filter(i => i.done).length;
-            
             const filtered = inventory.filter(item => {
                 const matchTab = (currentTab === 'SEMUA' || item.c === currentTab);
-                const matchSearch = item.n.toLowerCase().includes(search) || item.id.toString().includes(search);
+                const matchSearch = item.n.toLowerCase().includes(search) || item.id.toString() === search;
                 return matchTab && matchSearch;
             });
 
             filtered.forEach((item) => {
+                const globalIdx = inventory.findIndex(i => i.id === item.id);
                 list.innerHTML += `
-                    <div class="flex items-center p-4 rounded-xl transition-all border ${item.done ? 'checked-item' : 'unchecked-item'}">
-                        <span class="text-[10px] font-bold text-slate-400 mr-3 w-4">#${item.id}</span>
-                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggle(${item.id})" class="w-5 h-5 cursor-pointer accent-indigo-600">
-                        <div class="flex-1 ml-4">
-                            <h4 class="text-sm font-bold ${item.done ? 'text-emerald-700' : 'text-slate-800'}">${item.n}</h4>
-                            <p class="text-[10px] text-slate-400 uppercase font-mono">Qty: ${item.q} | ${item.c}</p>
+                    <div class="flex items-center p-4 rounded-xl shadow-sm transition-all border ${item.done ? 'checked-item' : 'unchecked-item'}">
+                        <span class="text-[10px] font-bold text-slate-400 mr-3 w-6">#${item.id}</span>
+                        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggle(${globalIdx})" 
+                               class="w-6 h-6 cursor-pointer accent-emerald-500 rounded-md">
+                        <div class="flex-1 ml-4" onclick="toggle(${globalIdx})">
+                            <h4 class="text-sm font-semibold ${item.done ? 'text-emerald-800 line-through' : 'text-slate-800'}">${item.n}</h4>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold uppercase">${item.c}</span>
+                                <span class="text-[10px] text-indigo-600 font-mono font-bold">QTY: ${item.q}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -174,38 +247,32 @@
 
             const percent = Math.round((doneCount / inventory.length) * 100);
             document.getElementById('progressBar').style.width = percent + '%';
-            document.getElementById('statsText').innerText = `${doneCount} / ${inventory.length} Item Terpenuhi`;
+            document.getElementById('statsText').innerText = `${doneCount} DARI ${inventory.length} ITEM SELESAI`;
             document.getElementById('percentText').innerText = percent + '%';
         }
 
-        function toggle(id) {
-            const idx = inventory.findIndex(item => item.id === id);
-            inventory[idx].done = !inventory[idx].done;
-            save();
-        }
+        function toggle(idx) { inventory[idx].done = !inventory[idx].done; save(); }
 
         function downloadJPG() {
-            const area = document.body;
-            html2canvas(area, { scale: 2 }).then(canvas => {
-                const a = document.createElement('a');
-                a.download = 'Inventory_Gorda_SAC.jpg';
-                a.href = canvas.toDataURL();
-                a.click();
+            html2canvas(document.body).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Inventaris_Gorda_121_Items.jpg';
+                link.href = canvas.toDataURL();
+                link.click();
             });
         }
 
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFontSize(14);
-            doc.text("LAPORAN INVENTARIS GORDA - SAC", 105, 15, { align: "center" });
-            
+            doc.setFontSize(16);
+            doc.text("LAPORAN INVENTARIS GORDA (121 ITEM)", 105, 15, { align: "center" });
+            doc.setFontSize(10);
             let y = 25;
-            doc.setFontSize(9);
             inventory.forEach(item => {
                 if(y > 280) { doc.addPage(); y = 20; }
-                const status = item.done ? "[V]" : "[ ]";
-                doc.text(`${status} #${item.id} ${item.n} (${item.q})`, 20, y);
+                const status = item.done ? "[V] " : "[ ] ";
+                doc.text(`${status} #${item.id} ${item.n} - ${item.q}`, 15, y);
                 y += 6;
             });
             doc.save("Laporan_Gorda_SAC.pdf");
