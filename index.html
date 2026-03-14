@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gorda Inventory Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .checked-item { background-color: #f1f5f9; text-decoration: line-through; opacity: 0.6; }
+        .sticky-header { position: sticky; top: 0; z-index: 50; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <div class="bg-blue-800 text-white p-6 shadow-lg sticky-header">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-2xl font-bold mb-2"><i class="fas fa-clipboard-list mr-2"></i> Persiapan Gorda Checkist</h1>
+            <div class="flex justify-between items-center mb-2 text-sm">
+                <span id="progress-text">0/0 Barang Siap</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="w-full bg-blue-900 rounded-full h-2.5">
+                <div id="progress-bar" class="bg-emerald-400 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto p-4">
+        <div class="mb-6">
+            <input type="text" id="searchInput" onkeyup="filterItems()" placeholder="Cari nama barang (misal: Amidas, Sofa, Tisu)..." 
+                   class="w-full p-4 rounded-xl border-none shadow-md focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div id="inventory-list" class="space-y-8">
+            </div>
+    </div>
+
+    <div class="fixed bottom-6 right-6 flex gap-2">
+        <button onclick="resetChecklist()" class="bg-red-500 text-white p-4 rounded-full shadow-xl hover:bg-red-600 transition">
+            <i class="fas fa-undo"></i>
+        </button>
+    </div>
+
+    <script>
+        // Data hasil ekstrak dari PDF "persiapan gorda.pdf"
+        const inventoryData = [
+            { cat: "I. Perlengkapan (Mebel & Ruangan)", items: [
+                { n: "Sofa Pimpinan Panjang (Qoah)", q: "-" },
+                { n: "Sofa Pimpinan Pendek (Qoah)", q: "-" },
+                { n: "Meja Pimpinan Panjang (Qoah)", q: "1" },
+                { n: "Meja Pimpinan Pendek (Qouh)", q: "1" },
+                { n: "Sofa (Muat 6 Orang) (Transit)", q: "Fleksibel" },
+                { n: "Meja KMI 11", q: "11" },
+                { n: "Kursi Futura", q: "3" },
+                { n: "Cermin Amen Gorda", q: "4" },
+                { n: "Kasur", q: "Fleksibel" },
+                { n: "Jumuran Baju", q: "3" }
+            ]},
+            { cat: "II. Adawat (Alat Makan & Dapur)", items: [
+                { n: "Kulkas", q: "-" },
+                { n: "Piring Ceper Pimpinan", q: "3" },
+                { n: "Piring Makan Biasa Penguji", q: "25" },
+                { n: "Gelas Tangkai", q: "3" },
+                { n: "Tutup Gelas Tangkai", q: "3" },
+                { n: "Sendok Makan Besi", q: "25" },
+                { n: "Mangkuk", q: "25" },
+                { n: "Tudung Saji", q: "3" },
+                { n: "Dispenser", q: "3" }
+            ]},
+            { cat: "III. Konsumsi & Logistik", items: [
+                { n: "Amidas Gelas 220ml", q: "90 Dus" },
+                { n: "Amidas Botol 600ml", q: "5 Dus" },
+                { n: "Amidas Galon", q: "15 Galon" },
+                { n: "Bal-Balan Pedes/Gurih/Manis", q: "13 Bal" },
+                { n: "Parcel Buah Sekali Ujian", q: "9 Parcel" },
+                { n: "Tisu Kotak Kardus", q: "20" },
+                { n: "Gelas Kertas/Plastik", q: "13 Slop" },
+                { n: "Toam Toples Ust Suyuh", q: "6-8 Jenis" }
+            ]},
+            { cat: "IV. Kebersihan & Mandi", items: [
+                { n: "Sabun Mandi Cair Besar", q: "5" },
+                { n: "Handuk Kamar Mandi", q: "7" },
+                { n: "Sikat Gigi & Odol", q: "9" },
+                { n: "Superpel & Rinso", q: "2" },
+                { n: "Pel-pelan & Sikat WC", q: "9" },
+                { n: "Pengharum Ruangan/Kamar Mandi", q: "4" }
+            ]}
+        ];
+
+        function renderList() {
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = '';
+            
+            inventoryData.forEach((section, sIdx) => {
+                let sectionHTML = `<div><h2 class="text-lg font-bold text-blue-900 mb-3 px-2 uppercase tracking-wide">${section.cat}</h2><div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-200">`;
+                
+                section.items.forEach((item, iIdx) => {
+                    const id = `item-${sIdx}-${iIdx}`;
+                    const isChecked = localStorage.getItem(id) === 'true';
+                    
+                    sectionHTML += `
+                        <div class="flex items-center p-4 border-b last:border-0 transition hover:bg-blue-50 item-row ${isChecked ? 'checked-item' : ''}">
+                            <input type="checkbox" id="${id}" ${isChecked ? 'checked' : ''} 
+                                   onchange="toggleItem('${id}')" 
+                                   class="w-6 h-6 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                            <label for="${id}" class="flex-1 ml-4 cursor-pointer">
+                                <span class="block font-semibold text-slate-800 item-name">${item.n}</span>
+                                <span class="text-xs text-slate-500 font-medium uppercase">Jumlah: ${item.q}</span>
+                            </label>
+                            <div class="text-slate-300 ml-2"><i class="fas fa-chevron-right text-xs"></i></div>
+                        </div>
+                    `;
+                });
+                
+                sectionHTML += `</div></div>`;
+                container.innerHTML += sectionHTML;
+            });
+            updateProgress();
+        }
+
+        function toggleItem(id) {
+            const cb = document.getElementById(id);
+            const row = cb.closest('.item-row');
+            localStorage.setItem(id, cb.checked);
+            
+            if(cb.checked) row.classList.add('checked-item');
+            else row.classList.remove('checked-item');
+            
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+            const percent = checkboxes.length > 0 ? Math.round((checked.length / checkboxes.length) * 100) : 0;
+            
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').innerText = `${checked.length}/${checkboxes.length} Barang Siap`;
+            document.getElementById('progress-percent').innerText = percent + '%';
+        }
+
+        function filterItems() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.item-row');
+            
+            rows.forEach(row => {
+                const name = row.querySelector('.item-name').innerText.toLowerCase();
+                row.style.display = name.includes(input) ? 'flex' : 'none';
+            });
+        }
+
+        function resetChecklist() {
+            if(confirm("Hapus semua centang dan mulai dari awal?")) {
+                localStorage.clear();
+                renderList();
+            }
+        }
+
+        // Jalankan saat load
+        window.onload = renderList;
+    </script>
+</body>
+</html>
