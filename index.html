@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gorda Inventory System</title>
+    <title>Gorda Inventory System v3.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,6 +12,7 @@
         body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
         .checked-item { background-color: #ecfdf5; border-left: 4px solid #10b981; }
         .unchecked-item { background-color: white; border-left: 4px solid #ef4444; }
+        .hidden-row { display: none !important; }
     </style>
 </head>
 <body class="pb-10">
@@ -22,35 +23,45 @@
             <div class="mt-4 bg-indigo-800 rounded-full h-4 overflow-hidden border border-indigo-700">
                 <div id="progressBar" class="bg-emerald-400 h-full transition-all duration-500" style="width: 0%"></div>
             </div>
-            <p id="statsText" class="text-[10px] mt-1 font-mono uppercase opacity-80">0/0 Item Terpenuhi (0%)</p>
+            <div class="flex justify-between items-center mt-1">
+                <p id="statsText" class="text-[10px] font-mono uppercase opacity-80">0/0 Item Terpenuhi (0%)</p>
+                <p id="searchStatus" class="text-[10px] font-mono uppercase opacity-80 hidden italic text-emerald-300">Filtering...</p>
+            </div>
         </div>
     </div>
 
     <div class="max-w-4xl mx-auto p-4 mt-4">
-        <div class="bg-white p-4 rounded-xl shadow-md mb-6 flex flex-wrap gap-2">
-            <button onclick="downloadJPG()" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 text-xs font-bold">
-                <i class="fas fa-image mr-1"></i> DOWNLOAD JPG
-            </button>
-            <button onclick="generatePDF()" class="bg-rose-600 text-white px-4 py-2 rounded shadow hover:bg-rose-700 text-xs font-bold">
-                <i class="fas fa-file-pdf mr-1"></i> DOWNLOAD PDF LAPORAN
-            </button>
-            <button onclick="resetData()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded shadow hover:bg-slate-300 text-xs font-bold ml-auto">
-                RESET SEMUA
-            </button>
-        </div>
+        
+        <div class="bg-white p-4 rounded-xl shadow-md mb-6 space-y-4">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="searchInput" onkeyup="searchBarang()" 
+                       placeholder="Cari barang (misal: Amidas, Tisu, Galon)..." 
+                       class="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none focus:ring-2 ring-indigo-500 transition-all text-sm">
+            </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-md mb-6">
-            <h3 class="text-xs font-bold mb-3 uppercase text-slate-500">Tambah Barang Baru</h3>
-            <div class="flex gap-2">
-                <input type="text" id="newItemName" placeholder="Nama Barang..." class="flex-1 border p-2 rounded text-sm outline-none focus:ring-2 ring-indigo-500">
-                <input type="text" id="newItemQty" placeholder="Jumlah..." class="w-24 border p-2 rounded text-sm outline-none focus:ring-2 ring-indigo-500">
-                <button onclick="addItem()" class="bg-indigo-600 text-white px-6 rounded font-bold hover:bg-indigo-700">+</button>
+            <div class="flex flex-wrap gap-2 pt-2 border-t">
+                <button onclick="downloadJPG()" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 text-[10px] font-bold">
+                    <i class="fas fa-image mr-1"></i> JPG
+                </button>
+                <button onclick="generatePDF()" class="bg-rose-600 text-white px-4 py-2 rounded shadow hover:bg-rose-700 text-[10px] font-bold">
+                    <i class="fas fa-file-pdf mr-1"></i> PDF LAPORAN
+                </button>
+                <button onclick="resetData()" class="bg-slate-100 text-slate-500 px-4 py-2 rounded text-[10px] font-bold ml-auto">
+                    RESET DATA
+                </button>
             </div>
         </div>
 
-        <div id="report-area" class="bg-white p-6 rounded-none shadow-sm hidden">
-             <h2 class="text-center font-bold text-xl underline mb-6">LAPORAN KESIAPAN BARANG GORDA</h2>
-             <div id="print-list"></div>
+        <div class="bg-white p-4 rounded-xl shadow-md mb-6 border-b-4 border-indigo-500">
+            <h3 class="text-[10px] font-bold mb-3 uppercase text-slate-400 tracking-wider">Input Barang Manual</h3>
+            <div class="flex gap-2">
+                <input type="text" id="newItemName" placeholder="Nama Barang..." class="flex-1 border-b p-2 text-sm outline-none focus:border-indigo-500">
+                <input type="text" id="newItemQty" placeholder="Qty" class="w-20 border-b p-2 text-sm outline-none focus:border-indigo-500">
+                <button onclick="addItem()" class="bg-indigo-600 text-white px-5 rounded-lg font-bold hover:bg-indigo-700 transition">+</button>
+            </div>
         </div>
 
         <div id="main-list" class="space-y-3">
@@ -58,7 +69,7 @@
     </div>
 
     <script>
-        // Data Awal dari Input User & PDF
+        // Data Gabungan dari PDF & Input List User 
         const initialData = [
             { n: "Dispenser (Minjem Gontor 2) (Transit)", q: "1" },
             { n: "Dispenser (Minjem Gontor 2) (Kamar Panjimas)", q: "1" },
@@ -95,11 +106,30 @@
             { n: "Pemanggang Roti", q: "1" }
         ];
 
-        let inventory = JSON.parse(localStorage.getItem('gorda_v2')) || initialData.map((d, i) => ({...d, id: Date.now() + i, done: false}));
+        let inventory = JSON.parse(localStorage.getItem('gorda_v3')) || initialData.map((d, i) => ({...d, id: Date.now() + i, done: false}));
 
         function save() {
-            localStorage.setItem('gorda_v2', JSON.stringify(inventory));
+            localStorage.setItem('gorda_v3', JSON.stringify(inventory));
             render();
+        }
+
+        // FUNGSI SEARCH (PENCARIAN)
+        function searchBarang() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.item-row');
+            const searchStatus = document.getElementById('searchStatus');
+
+            if(input) searchStatus.classList.remove('hidden');
+            else searchStatus.classList.add('hidden');
+
+            rows.forEach(row => {
+                const text = row.querySelector('.item-name').innerText.toLowerCase();
+                if(text.includes(input)) {
+                    row.classList.remove('hidden-row');
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
         }
 
         function render() {
@@ -110,13 +140,15 @@
             inventory.forEach((item, index) => {
                 if(item.done) doneCount++;
                 list.innerHTML += `
-                    <div class="flex items-center p-4 rounded-lg shadow-sm transition-all ${item.done ? 'checked-item' : 'unchecked-item'}">
+                    <div class="flex items-center p-4 rounded-lg shadow-sm transition-all item-row ${item.done ? 'checked-item' : 'unchecked-item'}">
                         <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggle(${index})" class="w-5 h-5 cursor-pointer accent-emerald-500">
                         <div class="flex-1 ml-4">
-                            <h4 class="text-sm font-bold ${item.done ? 'text-emerald-700' : 'text-slate-800'}">${item.n}</h4>
+                            <h4 class="text-sm font-bold item-name ${item.done ? 'text-emerald-700' : 'text-slate-800'}">${item.n}</h4>
                             <p class="text-[10px] text-slate-500 uppercase font-mono">Qty: ${item.q}</p>
                         </div>
-                        <button onclick="remove(${index})" class="text-slate-300 hover:text-red-500 p-2"><i class="fas fa-trash"></i></button>
+                        <button onclick="remove(${index})" class="text-slate-300 hover:text-red-500 p-2 ml-2 transition-colors">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 `;
             });
@@ -124,15 +156,24 @@
             const percent = inventory.length ? Math.round((doneCount / inventory.length) * 100) : 0;
             document.getElementById('progressBar').style.width = percent + '%';
             document.getElementById('statsText').innerText = `${doneCount}/${inventory.length} Item Terpenuhi (${percent}%)`;
+            
+            // Re-apply search filter setelah render ulang
+            searchBarang();
         }
 
         function toggle(idx) { inventory[idx].done = !inventory[idx].done; save(); }
-        function remove(idx) { if(confirm('Hapus barang ini?')) { inventory.splice(idx, 1); save(); } }
+        
+        function remove(idx) { 
+            if(confirm('Hapus item ini dari daftar?')) { 
+                inventory.splice(idx, 1); 
+                save(); 
+            } 
+        }
         
         function addItem() {
             const n = document.getElementById('newItemName').value;
-            const q = document.getElementById('newItemQty').value || "-";
-            if(!n) return alert("Nama barang wajib diisi!");
+            const q = document.getElementById('newItemQty').value || "1";
+            if(!n) return alert("Nama barang tidak boleh kosong!");
             inventory.push({ id: Date.now(), n, q, done: false });
             document.getElementById('newItemName').value = "";
             document.getElementById('newItemQty').value = "";
@@ -140,7 +181,7 @@
         }
 
         function resetData() {
-            if(confirm("Kembalikan ke data awal?")) {
+            if(confirm("PERINGATAN: Semua progres akan hilang dan data akan kembali ke awal. Lanjutkan?")) {
                 localStorage.clear();
                 inventory = initialData.map((d, i) => ({...d, id: Date.now() + i, done: false}));
                 save();
@@ -149,9 +190,9 @@
 
         function downloadJPG() {
             const area = document.getElementById('main-list');
-            html2canvas(area, { scale: 2 }).then(canvas => {
+            html2canvas(area, { scale: 2, backgroundColor: '#f1f5f9' }).then(canvas => {
                 const a = document.createElement('a');
-                a.download = 'Checklist_Inventory_Gorda.jpg';
+                a.download = 'Logistik_Gorda_Update.jpg';
                 a.href = canvas.toDataURL('image/jpeg', 0.9);
                 a.click();
             });
@@ -162,41 +203,45 @@
             const doc = new jsPDF();
             
             doc.setFontSize(16);
-            doc.text("LAPORAN STATUS INVENTORY GORDA", 105, 15, { align: "center" });
+            doc.setTextColor(30, 27, 75); // Indigo-900
+            doc.text("LAPORAN PERSIAPAN INVENTORY GORDA", 105, 20, { align: "center" });
             
-            let y = 30;
-            doc.setFontSize(12);
+            let y = 35;
             
-            doc.setTextColor(255, 0, 0);
-            doc.text("--- BARANG BELUM TERSEDIA (WARNING) ---", 20, y);
-            y += 10;
+            // Bagian Belum Siap
+            doc.setFontSize(11);
+            doc.setTextColor(220, 38, 38); // Red-600
+            doc.text("BELUM TERSEDIA / MASIH KURANG:", 20, y);
+            y += 8;
             doc.setTextColor(0, 0, 0);
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             
             inventory.filter(i => !i.done).forEach(item => {
                 if(y > 280) { doc.addPage(); y = 20; }
-                doc.text(`[ ] ${item.n} (${item.q})`, 20, y);
-                y += 7;
+                doc.text(`[ ] ${item.n} - ${item.q}`, 25, y);
+                y += 6;
             });
 
             y += 10;
-            doc.setFontSize(12);
-            doc.setTextColor(0, 150, 0);
-            doc.text("--- BARANG SUDAH SIAP ---", 20, y);
-            y += 10;
+            
+            // Bagian Sudah Siap
+            doc.setFontSize(11);
+            doc.setTextColor(5, 150, 105); // Emerald-600
+            doc.text("SUDAH SIAP / TERSEDIA:", 20, y);
+            y += 8;
             doc.setTextColor(100, 100, 100);
-            doc.setFontSize(10);
+            doc.setFontSize(9);
 
             inventory.filter(i => i.done).forEach(item => {
                 if(y > 280) { doc.addPage(); y = 20; }
-                doc.text(`[V] ${item.n} (${item.q})`, 20, y);
-                y += 7;
+                doc.text(`[V] ${item.n} - ${item.q}`, 25, y);
+                y += 6;
             });
 
-            doc.save("Laporan_Inventory_Gorda.pdf");
+            doc.save("Laporan_Logistik_Gorda.pdf");
         }
 
-        render();
+        window.onload = render;
     </script>
 </body>
 </html>
